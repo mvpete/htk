@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.757
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29613.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "htk.scheduler", "htk.scheduler\htk.scheduler.vcxproj", "{544ADB2B-0E72-44DA-9678-E6F7C3758EA6}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "examples", "examples\examples.vcxproj", "{EFAD1D7D-E7F0-4208-8D8B-EE60A73029B8}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "htk.coroutine", "htk.coroutine\htk.coroutine.vcxproj", "{7A0342B9-2D79-42F0-857F-C6D3A7DB3E4E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,6 +33,14 @@ Global
 		{EFAD1D7D-E7F0-4208-8D8B-EE60A73029B8}.Release|x64.Build.0 = Release|x64
 		{EFAD1D7D-E7F0-4208-8D8B-EE60A73029B8}.Release|x86.ActiveCfg = Release|Win32
 		{EFAD1D7D-E7F0-4208-8D8B-EE60A73029B8}.Release|x86.Build.0 = Release|Win32
+		{7A0342B9-2D79-42F0-857F-C6D3A7DB3E4E}.Debug|x64.ActiveCfg = Debug|x64
+		{7A0342B9-2D79-42F0-857F-C6D3A7DB3E4E}.Debug|x64.Build.0 = Debug|x64
+		{7A0342B9-2D79-42F0-857F-C6D3A7DB3E4E}.Debug|x86.ActiveCfg = Debug|Win32
+		{7A0342B9-2D79-42F0-857F-C6D3A7DB3E4E}.Debug|x86.Build.0 = Debug|Win32
+		{7A0342B9-2D79-42F0-857F-C6D3A7DB3E4E}.Release|x64.ActiveCfg = Release|x64
+		{7A0342B9-2D79-42F0-857F-C6D3A7DB3E4E}.Release|x64.Build.0 = Release|x64
+		{7A0342B9-2D79-42F0-857F-C6D3A7DB3E4E}.Release|x86.ActiveCfg = Release|Win32
+		{7A0342B9-2D79-42F0-857F-C6D3A7DB3E4E}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
