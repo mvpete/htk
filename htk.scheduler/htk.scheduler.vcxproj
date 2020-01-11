@@ -119,7 +119,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="awaitable_task.h" />
     <ClInclude Include="interruptable.h" />
     <ClInclude Include="scheduler.h" />
     <ClInclude Include="steady_task.h" />

@@ -2,12 +2,15 @@
 #define __scheduler_h__
 
 #include <detail/event.h>
+#include <detail/task.h>
+
 #include <future>
 #include <queue>
-#include <task.h>
 #include <vector>
 
-namespace htk 
+namespace htk
+{
+namespace scheduler
 {
 namespace detail
 {
@@ -31,10 +34,11 @@ namespace detail
 			if (stopped_)
 				return false;
 
-			while (tasks_.empty())
+			while (tasks_.empty() && !stopped_)
 			{
 				lk.unlock();
-				interrupt_.sleep();
+				interrupt_.reset();
+				interrupt_.wait();
 				lk.lock();
 			}
 
@@ -60,6 +64,7 @@ namespace detail
 				{
 					lk.unlock();
 					interrupt_.wait_for(ttl);
+					interrupt_.reset();
 					lk.lock();
 				}
 			}
@@ -67,39 +72,23 @@ namespace detail
 
 		}
 
-		void stop()
-		{
-			std::unique_lock<std::mutex> lk(qmtx_);
-			stopped_ = true;
-			interrupt_.wake_all();
-		}
-
-
-		template <typename CallableT>
-		void schedule_now(CallableT &&fn)
-		{
-		}
-
-		template <typename CallableT>
-		void schedule_at(CallableT &&fn, ...)
-		{
-		}
-
-		template <typename CallableT>
-		void schedule_after(CallableT &&fn, ...)
-		{
-		}
-
-	private:
-
 		void schedule_task(typename task<ClockT>::ptr t)
 		{
 			std::unique_lock<std::mutex> lk(qmtx_);
 			if (stopped_)
 				return;
 			tasks_.emplace(std::move(t));
-			interrupt_.wake();
+			interrupt_.signal();
 		}
+
+		void stop()
+		{
+			std::unique_lock<std::mutex> lk(qmtx_);
+			stopped_ = true;
+			interrupt_.signal_all();
+		}
+
+	private:
 
 		event_t<ClockT> interrupt_;
 		std::mutex qmtx_;
@@ -109,16 +98,8 @@ namespace detail
 
 	using system_scheduler = scheduler<std::chrono::system_clock>;
 	using steady_scheduler = scheduler<std::chrono::steady_clock>;
-	
-	namespace this_scheduler
-	{
-		steady_scheduler &get()
-		{
-			static steady_scheduler instance;
-			return instance;
-		}
-	}
 
+}
 }
 }
 

@@ -27,8 +27,5 @@
     <ClInclude Include="steady_task.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="awaitable_task.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>

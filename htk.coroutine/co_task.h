@@ -1,195 +1,324 @@
 #ifndef __co_task_h__
 #define __co_task_h__
 
+#include <detail/event.h>
+#include <co_schedule.h>
+
 #include <experimental/coroutine>
 #include <future>
 #include <iostream>
+#include <variant>
 
 namespace htk
 {
+	template <typename T>
+	class co_task
+	{
 
-    class co_task
-    {
-    public:
-        struct promise_type;
-        using promise_t = promise_type;
-        using coro_handle = std::experimental::coroutine_handle<typename promise_t>;
+	private:
 
-        co_task(coro_handle h)
-            :handle_(h)
-        {
-            std::cout << std::this_thread::get_id() << " : co_task()" << std::endl;
-        }
+		struct promise_base
+		{
+			promise_base()
+			{
+			}
 
-        bool resume()
-        {
-            std::cout << std::this_thread::get_id() << " : resume()" << std::endl;
-            if (!done())
-                handle_.resume();
-            return done();
-        }
+			virtual ~promise_base() = default;
 
-        bool done() const
-        {
-            return handle_.done();
-        }
+			std::experimental::suspend_always initial_suspend() const noexcept
+			{
+				return {};
+			}
 
-        void wait()
-        {
-            while (!done());
-        }
+			std::experimental::suspend_always final_suspend() const noexcept
+			{
+				return {};
+			}
 
-        struct promise_type
-        {
+			bool is_complete()
+			{
+				return event_.is_set();
+			}
 
-            co_task get_return_object()
-            {
-                std::cout << std::this_thread::get_id() << " : get_return_object" << std::endl;
-                return coro_handle::from_promise(*this);
-            }
-            std::experimental::suspend_always initial_suspend() const noexcept
-            {
-                std::cout << std::this_thread::get_id() << " : initial_suspend" << std::endl;
-                return {};
-            }
-            std::experimental::suspend_always final_suspend() const noexcept
-            {
-                std::cout << std::this_thread::get_id() << " : final_suspend" << std::endl;
-                return {};
-            }
-            void unhandled_exception() const noexcept
-            {
-                std::terminate();
-            }
-            void return_void() const noexcept
-            {
-                std::cout << std::this_thread::get_id() << " : return_void" << std::endl;
-            }
-            
-        };
+			void wait()
+			{
+				event_.wait();
+			}
+
+			scheduler::detail::event event_;
+		};
+
+		template <typename ValueT>
+		class promise : public promise_base
+		{
+		public:
+			using value_t = typename std::remove_reference<ValueT>::type;
+		private:
+			std::variant<value_t, std::exception_ptr> value_;
+		public:
+
+			co_task get_return_object()
+			{
+				return std::experimental::coroutine_handle<promise>::from_promise(*this);
+			}
+
+			template<typename VALUE, typename = std::enable_if_t<std::is_convertible_v<VALUE &&, T>>>
+			void return_value(VALUE &&value)
+			{
+				value_ = std::forward<VALUE>(value);
+				promise_base::event_.signal();
+			}
+
+			
+			void set_exception(std::exception_ptr exception)
+			{
+				value_ = exception;
+				promise_base::event_.signal();
+			}
+
+			const value_t &get() const
+			{
+				promise_base::event_.wait();
+				if (std::holds_alternative<std::exception_ptr>(value_))
+				{
+					std::rethrow_exception(std::get<std::exception_ptr>(value_));
+				}
+				return std::get<value_t>(value_);
+			}
+
+		};
+
+		template <>
+		class promise<void> : public promise_base
+		{
+			std::exception_ptr exception_;
+
+		public:
+			co_task get_return_object()
+			{
+				return std::experimental::coroutine_handle<promise>::from_promise(*this);
+			}
+
+			void unhandled_exception() noexcept
+			{
+				exception_ = std::current_exception();
+				promise_base::event_.signal();
+			}
+
+			void return_void() noexcept
+			{
+				promise_base::event_.signal();
+			}
+
+			void get() const
+			{
+				promise_base::event_.wait();
+				if (exception_)
+					std::rethrow_exception(exception_);
+			}
+
+		};
+
+	public:
+
+		using promise_type = promise<T>;
+		using coro_handle = std::experimental::coroutine_handle<promise_type>;
+
+		co_task()
+		{
+		}
+
+		co_task(coro_handle h)
+			:handle_(h)
+		{
+		}
+
+		bool resume() const
+		{
+			if (!is_complete())
+				handle_.resume();
+			return is_complete();
+		}
+
+		bool is_complete() const
+		{
+			return handle_.promise().is_complete();
+		}
+
+		T get()
+		{
+			return handle_.promise().get();
+		}
+
+		void wait() const
+		{
+			handle_.promise().wait();
+		}
+
+	private:
+		coro_handle handle_;
+	};
+
+	namespace detail
+	{
+		template <typename T>
+		struct co_task_awaiter
+		{
+			co_task<T> &task;
+
+			bool await_ready() const
+			{
+				return task.is_complete();
+			}
+
+			void await_suspend(std::experimental::coroutine_handle<co_task::promise_type> resume_cb)
+			{
+				htk::this_scheduler::schedule_now([resume_cb, this]()
+				{
+					task.resume();
+					resume_cb();
+				});
+			}
+
+			T await_resume()
+			{
+				return task.get();
+			}
+
+		};
+
+		template <>
+		struct co_task_awaiter<void>
+		{
+			co_task<void> &task;
+			bool await_ready() const
+			{
+				return task.is_complete();
+			}
+
+			void await_suspend(std::experimental::coroutine_handle<co_task<void>::promise_type> resume_cb)
+			{
+				htk::scheduler::this_scheduler::schedule_now([resume_cb, this]()
+				{
+					task.resume();
+					resume_cb();
+				});
+			}
+
+			void await_resume() {}
+		};
+
+		template <typename T>
+		auto operator co_await(co_task<T> &&task)
+		{
+			return co_task_awaiter<T>{ task };
+		}
+
+		template <>
+		auto operator co_await(co_task<void> &&task)
+		{
+			return co_task_awaiter<void>{ task };
+		}
+	}
+
+	template <typename T>
+	co_task<T> co_schedule(co_task<T> &&task)
+	{
+		scheduler::this_scheduler::schedule_now([task]()
+		{
+			task.resume();
+		});
+		return task;
+	}
+
+	template <>
+	co_task<void> co_schedule(co_task<void> &&task)
+	{
+		scheduler::this_scheduler::schedule_now([task]()
+		{
+			task.resume();
+		});
+		return task;
+	}
+
+	template <typename Scheduler, typename FnT>
+	auto co_schedule(Scheduler &scheduler, FnT &&fn)
+	{
+		struct schedule_now_awaiter
+		{
+			using result_t = std::invoke_result_t<FnT()>;
+			Scheduler &scheduler;
+			FnT fn;
+			bool await_ready() const
+			{
+				return false;
+			}
+
+			void await_suspend(std::experimental::coroutine_handle<> resume_cb)
+			{
+				scheduler::detail::schedule_now(scheduler, [resume_cb, this]()
+				{
+					resume_cb();
+				});
+			}
+
+			auto await_resume() {
+				return fn();
+			}
+			
+		};
+		return schedule_now_awaiter{ scheduler, fn };
+	}
+
+	template <typename FnT>
+	auto co_schedule(FnT &&fn)
+	{
+		return co_schedule(scheduler::this_scheduler::get(), std::forward<FnT>(fn));
+	}
+
+	template <typename Scheduler>
+	auto co_schedule(Scheduler &scheduler)
+	{
+		struct schedule_now_awaiter
+		{
+			Scheduler &scheduler;
+			bool await_ready() const
+			{
+				return false;
+			}
+
+			void await_suspend(std::experimental::coroutine_handle<> resume_cb)
+			{
+				scheduler::detail::schedule_now(scheduler, [resume_cb, this]()
+				{
+					resume_cb();
+				});
+			}
+
+			void await_resume() {}
+		};
+		return schedule_now_awaiter{scheduler};
+	}
+
+	auto co_schedule()
+	{
+		return co_schedule(scheduler::this_scheduler::get());
+	}
 
 
-    private:
-        coro_handle handle_;
-    };
-
-    struct co_task_awaiter
-    {
-        co_task& task;
-
-        bool await_ready() const
-        {
-            std::cout << std::this_thread::get_id()  << " : await_ready" << std::endl;
-            return task.done();
-        }
-
-        void await_suspend(std::experimental::coroutine_handle<> resume_cb)
-        {
-            std::cout << std::this_thread::get_id()  << " : await_suspend" << std::endl;
-            std::thread t([resume_cb, this]() { 
-            
-                std::cout << std::this_thread::get_id() << " : in thread" << std::endl;
-                resume_cb(); 
-            });
-            t.detach();
-        }
-
-        decltype(auto) await_resume()
-        {
-            std::cout << std::this_thread::get_id() << " : await_resume" << std::endl;
-            task.resume();
-        }
-
-    };
-
-    auto operator co_await(co_task&& task)
-    {
-        return co_task_awaiter{ task };
-    }
 
 
-    //namespace experimental {
-    //    template <class _Ty, class... _ArgTypes>
-    //    struct coroutine_traits<future<_Ty>, _ArgTypes...> {
-    //        // defines resumable traits for functions returning future<_Ty>
-    //        struct promise_type {
-    //            promise<_Ty> _MyPromise;
+	//template<typename CallableT>
+	//co_task<typename std::result_of<CallableT()>::type>  co_schedule_at(CallableT &&fn)
+	//{
+	//	this_scheduler::get().schedule_at(fn);
+	//}
 
-    //            future<_Ty> get_return_object() {
-    //                return _MyPromise.get_future();
-    //            }
-
-    //            suspend_never initial_suspend() const noexcept {
-    //                return {};
-    //            }
-
-    //            suspend_never final_suspend() const noexcept {
-    //                return {};
-    //            }
-
-    //            template <class _Ut>
-    //            void return_value(_Ut&& _Value) {
-    //                _MyPromise.set_value(_STD forward<_Ut>(_Value));
-    //            }
-
-    //            void unhandled_exception() {
-    //                _MyPromise.set_exception(_STD current_exception());
-    //            }
-    //        };
-    //    };
-
-    //    template <class... _ArgTypes>
-    //    struct coroutine_traits<future<void>, _ArgTypes...> {
-    //        // defines resumable traits for functions returning future<void>
-    //        struct promise_type {
-    //            promise<void> _MyPromise;
-
-    //            future<void> get_return_object() {
-    //                return _MyPromise.get_future();
-    //            }
-
-    //            suspend_never initial_suspend() const noexcept {
-    //                return {};
-    //            }
-
-    //            suspend_never final_suspend() const noexcept {
-    //                return {};
-    //            }
-
-    //            void return_void() {
-    //                _MyPromise.set_value();
-    //            }
-
-    //            void unhandled_exception() {
-    //                _MyPromise.set_exception(_STD current_exception());
-    //            }
-    //        };
-    //    };
-
-    //    template <class _Ty>
-    //    struct _Future_awaiter {
-    //        future<_Ty>& _Fut;
-
-    //        bool await_ready() const {
-    //            return _Fut._Is_ready();
-    //        }
-
-    //        void await_suspend(experimental::coroutine_handle<> _ResumeCb) {
-    //            // TRANSITION, change to .then if and when future gets .then
-    //            thread _WaitingThread([&_Fut = _Fut, _ResumeCb]() mutable {
-    //                _Fut.wait();
-    //                _ResumeCb();
-    //                });
-    //            _WaitingThread.detach();
-    //        }
-
-    //        decltype(auto) await_resume() {
-    //            return _Fut.get();
-    //        }
-    //    };
-
-    //} // namespace experimental
-
+	//template<typename CallableT>
+	//co_task<typename std::result_of<CallableT()>::type>  co_schedule_after(CallableT &&fn)
+	//{
+	//	this_scheduler::get().schedule_after(fn);
+	//}
 
 };
 
