@@ -1,15 +1,26 @@
 #ifndef __co_schedule_h__
 #define __co_schedule_h__
 
-#include <detail/scheduler.h>
-#include <detail/task.h>
+#include <htk/detail/scheduler.h>
+#include <htk/detail/task.h>
 
 namespace htk
 {
 	namespace scheduler
 	{
+		using steady_scheduler = detail::steady_scheduler;
+
 		namespace detail
 		{
+			struct static_scheduler
+			{
+				static steady_scheduler& get()
+				{
+					static detail::steady_scheduler instance;
+					return instance;
+				}
+			};
+
 			template <typename Scheduler, typename Function>
 			void schedule_now(Scheduler &scheduler, Function &&fn)
 			{
@@ -30,16 +41,19 @@ namespace htk
 
 		namespace this_scheduler
 		{
-			detail::steady_scheduler &get()
+			
+			// to avoid mulitple definitions, create a struct with a static get,
+			// then inline the global method.
+			inline steady_scheduler& get()
 			{
-				static detail::steady_scheduler instance;
-				return instance;
+				return detail::static_scheduler::get();
 			}
+			
 
 			template <typename FnT>
 			void schedule_now(FnT &&fn)
 			{
-				scheduler::detail::schedule_now(get(), std::forward<FnT>(fn));
+				scheduler::detail::schedule_now(this_scheduler::get(), std::forward<FnT>(fn));
 			}
 
 			template <typename FnT>
@@ -60,5 +74,6 @@ namespace htk
 
 	
 };
+
 
 #endif //__co_schedule_h__

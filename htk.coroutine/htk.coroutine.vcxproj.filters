@@ -14,32 +14,30 @@
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
     <Filter Include="Header Files\detail">
-      <UniqueIdentifier>{478d7266-0cfd-457a-9095-e2399d5dc265}</UniqueIdentifier>
+      <UniqueIdentifier>{a5eff512-1fdc-48e1-b3cc-c56c97ef4c2a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="co_task.h">
+    <ClInclude Include="include\htk\co_routine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="co_schedule.h">
+    <ClInclude Include="include\htk\co_schedule.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="detail\scheduler.h">
-      <Filter>Header Files\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="detail\task.h">
-      <Filter>Header Files\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="detail\event.h">
-      <Filter>Header Files\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="co_thread.h">
+    <ClInclude Include="include\htk\co_task.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
+    <ClInclude Include="include\htk\co_thread.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\htk\detail\event.h">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\htk\detail\scheduler.h">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\htk\detail\task.h">
+      <Filter>Header Files\detail</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

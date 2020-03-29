@@ -1,8 +1,8 @@
 #ifndef __scheduler_h__
 #define __scheduler_h__
 
-#include <detail/event.h>
-#include <detail/task.h>
+#include <htk/detail/event.h>
+#include <htk/detail/task.h>
 
 #include <future>
 #include <queue>

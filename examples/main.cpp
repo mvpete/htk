@@ -1,8 +1,5 @@
 
-#include "co_task.h"
-#include "co_thread.h"
-#include "co_schedule.h"
-
+#include <htk/co_routine.h>
 
 #include <iostream>
 #include <future>
@@ -20,12 +17,12 @@ htk::co_task<int> r3()
 	co_return val;
 }
 
-//htk::co_task<void> resume_background()
-//{
-//	std::cout << std::this_thread::get_id() << ": " << "This on this thread." << std::endl;
-//	co_await htk::resume_now();
-//	std::cout << std::this_thread::get_id() << ": " << "Then on this thread." << std::endl;
-//}
+htk::co_task<void> resume_background()
+{
+	std::cout << std::this_thread::get_id() << ": " << "This happens." << std::endl;
+	co_await std::experimental::suspend_always{}; // suspension point, returns control back to caller
+	std::cout << std::this_thread::get_id() << ": " << "Then this happens." << std::endl;
+}
 //
 //htk::co_task<int> something_int_async()
 //{

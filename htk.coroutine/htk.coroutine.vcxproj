@@ -18,6 +18,15 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\htk\co_routine.h" />
+    <ClInclude Include="include\htk\co_schedule.h" />
+    <ClInclude Include="include\htk\co_task.h" />
+    <ClInclude Include="include\htk\co_thread.h" />
+    <ClInclude Include="include\htk\detail\event.h" />
+    <ClInclude Include="include\htk\detail\scheduler.h" />
+    <ClInclude Include="include\htk\detail\task.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <ProjectGuid>{7A0342B9-2D79-42F0-857F-C6D3A7DB3E4E}</ProjectGuid>
@@ -88,7 +97,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalOptions>/await /std:c++latest %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>./;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../include/htk;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -102,7 +111,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalOptions>/await /std:c++latest %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>./;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../include/htk;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -118,7 +127,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalOptions>/await /std:c++latest %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>./;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../include/htk;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -136,7 +145,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalOptions>/await /std:c++latest %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>./;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../include/htk;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -145,17 +154,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClInclude Include="co_thread.h" />
-    <ClInclude Include="co_schedule.h" />
-    <ClInclude Include="co_task.h" />
-    <ClInclude Include="detail\event.h" />
-    <ClInclude Include="detail\scheduler.h" />
-    <ClInclude Include="detail\task.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="main.cpp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -1,8 +1,8 @@
 #ifndef __co_task_h__
 #define __co_task_h__
 
-#include <detail/event.h>
-#include <co_schedule.h>
+#include <htk/detail/event.h>
+#include <htk/co_schedule.h>
 
 #include <experimental/coroutine>
 #include <future>
@@ -11,6 +11,8 @@
 
 namespace htk
 {
+	struct avoid_md {};
+
 	template <typename T>
 	class co_task
 	{
@@ -68,11 +70,10 @@ namespace htk
 				value_ = std::forward<VALUE>(value);
 				promise_base::event_.signal();
 			}
-
-			
-			void set_exception(std::exception_ptr exception)
+						
+			void unhandled_exception()
 			{
-				value_ = exception;
+				value_ = std::current_exception();
 				promise_base::event_.signal();
 			}
 
@@ -161,6 +162,7 @@ namespace htk
 
 	namespace detail
 	{
+
 		template <typename T>
 		struct co_task_awaiter
 		{
@@ -173,7 +175,7 @@ namespace htk
 
 			void await_suspend(std::experimental::coroutine_handle<co_task::promise_type> resume_cb)
 			{
-				htk::this_scheduler::schedule_now([resume_cb, this]()
+				htk::scheduler::this_scheduler::schedule_now([resume_cb, this]()
 				{
 					task.resume();
 					resume_cb();
@@ -187,37 +189,10 @@ namespace htk
 
 		};
 
-		template <>
-		struct co_task_awaiter<void>
-		{
-			co_task<void> &task;
-			bool await_ready() const
-			{
-				return task.is_complete();
-			}
-
-			void await_suspend(std::experimental::coroutine_handle<co_task<void>::promise_type> resume_cb)
-			{
-				htk::scheduler::this_scheduler::schedule_now([resume_cb, this]()
-				{
-					task.resume();
-					resume_cb();
-				});
-			}
-
-			void await_resume() {}
-		};
-
 		template <typename T>
 		auto operator co_await(co_task<T> &&task)
 		{
 			return co_task_awaiter<T>{ task };
-		}
-
-		template <>
-		auto operator co_await(co_task<void> &&task)
-		{
-			return co_task_awaiter<void>{ task };
 		}
 	}
 
@@ -231,8 +206,8 @@ namespace htk
 		return task;
 	}
 
-	template <>
-	co_task<void> co_schedule(co_task<void> &&task)
+	template <typename Tag>
+	co_task<void> co_schedule(co_task<void>&& task, Tag t = htk::avoid_md{})
 	{
 		scheduler::this_scheduler::schedule_now([task]()
 		{
