@@ -23,7 +23,7 @@ namespace htk
     
 
     template <typename T>
-    struct default_allocator
+    struct allocator
     {
         using pointer = T*;
         using const_pointer = const T*;
@@ -31,8 +31,8 @@ namespace htk
         using const_reference = const T&;
         using size_type = size_t;
 
-        default_allocator()
-        {}
+        allocator() = default;
+        ~allocator() = default;
 
         // address
         pointer address(reference x) const
@@ -45,20 +45,19 @@ namespace htk
             return &x;
         }
 
-        pointer allocate(const size_t count)
+        pointer allocate(size_t count)
         {
-            T* temp = static_cast<T*>(::operator new(count));
+            T* temp = static_cast<T*>(::operator new(count*sizeof(T)));
             if (temp == nullptr)
             {
                 throw bad_alloc();
             }
-
             return temp;
         }
 
         void deallocate(pointer p, size_type n)
         {
-            ::operator delete(p, n);
+            ::operator delete(p, n * sizeof(T));
         }
 
         size_type max_size() const
@@ -76,6 +75,12 @@ namespace htk
         {
             p->~T();
         }
+    };
+
+    template <>
+    struct allocator<void>
+    {
+        using pointer = void*;
     };
 }
 

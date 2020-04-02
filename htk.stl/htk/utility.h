@@ -17,17 +17,30 @@ namespace htk
     }
 
     template <typename T>
-    constexpr T&& forward(remove_reference_t<T>& arg)
+    constexpr T&& forward(remove_reference_t<T>& t)
     {
-        return static_cast<T&&>(arg);
+        return static_cast<T&&>(t);
     }
 
     template <typename T>
-    constexpr T&& forward(remove_reference_t<T>&& arg)
+    constexpr T&& forward(remove_reference_t<T>&& t)
     {
-        return static_cast<T&&>(arg);
+        return static_cast<T&&>(t);
     }
 
+
+    template <typename T>
+    constexpr auto&& move(T&& t)
+    {
+        return static_cast<remove_reference_t<T>&&>(t);
+    }
+
+
+    template<bool B, class T, class F>
+    struct conditional { typedef T type; };
+
+    template<class T, class F>
+    struct conditional<false, T, F> { typedef F type; };
 }
 
 #endif // __htk_utility_h__

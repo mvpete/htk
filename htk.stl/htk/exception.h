@@ -1,7 +1,6 @@
 #ifndef __htk_exception_h__
 #define __htk_exception_h__
 
-#include <malloc.h>
 #include <string.h>
 
 #include <vcruntime_exception.h>
@@ -23,16 +22,21 @@ namespace htk
         }
 
         exception(const char* message)
-            :message_(reinterpret_cast<const char *>(malloc(strnlen(message,256))))
+            :message_(reinterpret_cast<const char *>(::operator new(strnlen(message,256))))
         {
             if (message_ == nullptr)
                 exit(-1);
             strncpy_s(const_cast<char *const>(message_), 256, message, 256);
         }
 
+        exception(const exception& e)
+            :exception(e.message_)
+        {
+        }
+
         ~exception()
         {
-            free(const_cast<void*>(reinterpret_cast<const void*>(message_)));
+            ::operator delete(const_cast<void*>(reinterpret_cast<const void*>(message_)));
         }
 
         virtual const char* what()
