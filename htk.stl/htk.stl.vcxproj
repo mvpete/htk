@@ -20,7 +20,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="htk\exception.h" />
+    <ClInclude Include="htk\initializer_list.h" />
+    <ClInclude Include="htk\iterator.h" />
     <ClInclude Include="htk\memory.h" />
+    <ClInclude Include="htk\stdexcept.h" />
     <ClInclude Include="htk\types.h" />
     <ClInclude Include="htk\type_traits.h" />
     <ClInclude Include="htk\utility.h" />

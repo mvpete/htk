@@ -58,6 +58,24 @@ namespace htk
         {
         }
     };
+
+    class invalid_operation : public exception
+    {
+    public:
+        invalid_operation()
+            :exception("invalid operation")
+        {
+
+        }
+
+        invalid_operation(const char* message)
+            :exception(message)
+        {
+
+        }
+    };
+
+
 }
 
 #endif // __htk_exception_h__

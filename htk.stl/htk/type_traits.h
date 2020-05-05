@@ -51,6 +51,42 @@ namespace htk
     using remove_reference_t = typename remove_reference<T>::type;
 
     template <typename T>
+    struct remove_cv
+    {
+        using type = T;
+    };
+
+    template <typename T>
+    struct remove_cv<const T>
+    {
+        using type = T;
+    };
+
+    template <typename T>
+    struct remove_cv<volatile T>
+    {
+        using type = T;
+    };
+
+    template <typename T>
+    struct remove_cv<const volatile T>
+    {
+        using type = T;
+    };
+
+    template <typename T>
+    using remove_cv_t = typename remove_cv<T>::type;
+
+    template <typename T>
+    struct remove_cvref
+    {
+        using type = typename remove_cv<typename remove_reference<T>::type>::type;
+    };
+
+    template <typename T>
+    using remove_cvref_t = typename remove_cvref<T>::type;
+
+    template <typename T>
     struct is_trivially_copyable : bool_constant<__is_trivially_copyable(T)> {};
 
     template <typename T>
@@ -76,6 +112,15 @@ namespace htk
 
     template <typename T>
     constexpr bool is_move_constructible_v = is_move_constructible<T>::value;
+
+    template <typename T>
+    struct is_pointer : htk::false_type {};
+
+    template <typename T>
+    struct is_pointer<T*> : htk::true_type {};
+
+    template <typename T>
+    constexpr bool is_pointer_v = is_pointer<T>::value;
 }
 
 #endif //__htk_type_traits_h__

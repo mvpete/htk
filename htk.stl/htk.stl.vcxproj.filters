@@ -33,5 +33,14 @@
     <ClInclude Include="htk\type_traits.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="htk\initializer_list.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="htk\stdexcept.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="htk\iterator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
