@@ -109,7 +109,7 @@ unsigned int test_obj::move_assigns = 0;
 
 
 template <typename T, typename Vec, size_t size>
-void expect_eq(std::array<T, size> array, const Vec& vec)
+void expect_eq_rg(std::array<T, size> array, const Vec& vec)
 {
     EXPECT_EQ(array.size(), vec.size());
     for (size_t i = 0; i < array.size(); ++i)
@@ -117,12 +117,15 @@ void expect_eq(std::array<T, size> array, const Vec& vec)
 }
 
 template <typename T, typename Vec>
-void expect_eq(const std::initializer_list<T> &array, const Vec& vec)
+void expect_eq_rg(const std::initializer_list<T> &array, const Vec& vec)
 {
-    EXPECT_EQ(array.size(), vec.size());
+    ASSERT_EQ(array.size(), vec.size());
     auto begin = array.begin();
     for (size_t i = 0; i < array.size(); ++i, ++begin)
-        EXPECT_EQ(*begin, vec.at(i));
+    {
+        T v = vec.at(i);
+        EXPECT_EQ(*begin, v);
+    }
 }
 
 TEST(htk_stl_vector_tests, vector_initialize_pod) 
@@ -258,7 +261,7 @@ TEST(htk_stl_vector_tests, vector_pod_insert_one_begin_has_capacity)
 
 }
 
-TEST(htk_stl_vector_tests, vector_pod_insert_multi_begin_has_capacity)
+TEST(htk_stl_vector_tests, vector_pod_insert_value_multi_begin_has_capacity)
 {
     htk::vector<int> v;
 
@@ -270,11 +273,11 @@ TEST(htk_stl_vector_tests, vector_pod_insert_multi_begin_has_capacity)
     v.insert(begin, 3, 1);
 
     EXPECT_EQ(htk::vector<int>::initial_capacity, v.capacity());
-    expect_eq({ 1,1,1,2,3,4 }, v);
+    expect_eq_rg({ 1,1,1,2,3,4 }, v);
 
 }
 
-TEST(htk_stl_vector_tests, vector_pod_insert_one_middle_has_capacity)
+TEST(htk_stl_vector_tests, vector_pod_insert_value_one_middle_has_capacity)
 {
     htk::vector<int> v;
 
@@ -288,7 +291,7 @@ TEST(htk_stl_vector_tests, vector_pod_insert_one_middle_has_capacity)
     EXPECT_EQ(htk::vector<int>::initial_capacity, v.capacity());
 }
 
-TEST(htk_stl_vector_tests, vector_pod_insert_multi_middle_has_capacity)
+TEST(htk_stl_vector_tests, vector_pod_insert_value_multi_middle_has_capacity)
 {
     htk::vector<uint8_t> v;
 
@@ -302,11 +305,11 @@ TEST(htk_stl_vector_tests, vector_pod_insert_multi_middle_has_capacity)
     v.insert(begin, 3, 3);
 
     EXPECT_EQ(htk::vector<int>::initial_capacity, v.capacity());
-    expect_eq({ uint8_t{1},uint8_t{2},uint8_t{3},uint8_t{3},uint8_t{3},uint8_t{4},uint8_t{5},uint8_t{6} }, v);
+    expect_eq_rg({ uint8_t{1},uint8_t{2},uint8_t{3},uint8_t{3},uint8_t{3},uint8_t{4},uint8_t{5},uint8_t{6} }, v);
 
 }
 
-TEST(htk_stl_vector_tests, vector_class_insert_multi_middle_has_capacity)
+TEST(htk_stl_vector_tests, vector_class_insert_value_multi_middle_has_capacity)
 {
     htk::vector<test_obj> v;
     //v.reserve(10);
@@ -321,11 +324,11 @@ TEST(htk_stl_vector_tests, vector_class_insert_multi_middle_has_capacity)
     v.insert(begin, 3, 3);
 
     EXPECT_EQ(htk::vector<int>::initial_capacity, v.capacity());
-    expect_eq({ test_obj(1),test_obj(2),test_obj(3),test_obj(3),test_obj(3),test_obj(4),test_obj(5),test_obj(6) }, v);
+    expect_eq_rg({ test_obj(1),test_obj(2),test_obj(3),test_obj(3),test_obj(3),test_obj(4),test_obj(5),test_obj(6) }, v);
 
 }
 
-TEST(htk_stl_vector_tests, vector_pod_insert_one_end_has_capacity)
+TEST(htk_stl_vector_tests, vector_pod_insert_value_one_end_has_capacity)
 {
     htk::vector<int> v;
 
@@ -341,7 +344,7 @@ TEST(htk_stl_vector_tests, vector_pod_insert_one_end_has_capacity)
 
 }
 
-TEST(htk_stl_vector_tests, vector_pod_insert_multi_end_has_capacity)
+TEST(htk_stl_vector_tests, vector_pod_insert_value_multi_end_has_capacity)
 {
     htk::vector<int> v;
 
@@ -352,44 +355,76 @@ TEST(htk_stl_vector_tests, vector_pod_insert_multi_end_has_capacity)
     v.insert(v.end(), 3, 4);
 
     EXPECT_EQ(htk::vector<int>::initial_capacity, v.capacity());
-    expect_eq({ 1,2,3,4,4,4 }, v);
+    expect_eq_rg({ 1,2,3,4,4,4 }, v);
 
 }
-
 
 // insert range
 TEST(htk_stl_vector_tests, vector_pod_insert_range_end_has_capacity)
 {
-    htk::vector<int> v;
+    htk::vector<int> v{ 1, 2, 3 };
+    htk::vector<int> v2{ 4, 5, 6 };
 
-    v.emplace_back(1);
-    v.emplace_back(2);
-    v.emplace_back(3);
-
-    htk::vector<int> v2;
-    v2.emplace_back(4);
-    v2.emplace_back(5);
-    v2.emplace_back(6);
-
-    int arr[3];
-
-    //v.insert(v.end(), v2.begin(), v2.end());
+    v.insert(v.end(), v2.begin(), v2.end());
 
     EXPECT_EQ(htk::vector<int>::initial_capacity, v.capacity());
-    expect_eq({ 1,2,3,4,5,6 }, v);
-
+    expect_eq_rg({ 1,2,3,4,5,6 }, v);
 }
 
 TEST(htk_stl_vector_tests, vector_pod_insert_range_begin_has_capacity)
 {
-    EXPECT_TRUE(false);
+    htk::vector<int> v{ 1, 2, 3 };
+    htk::vector<int> v2{ 4, 5, 6 };
+
+    v.insert(v.begin(), v2.begin(), v2.end());
+
+    EXPECT_EQ(htk::vector<int>::initial_capacity, v.capacity());
+    expect_eq_rg({ 4,5,6,1,2,3 }, v);
 }
 
 TEST(htk_stl_vector_tests, vector_pod_insert_range_middle_has_capacity)
 {
-    EXPECT_TRUE(false);
+    htk::vector<int> v{ 1, 2, 3 };
+    htk::vector<int> v2{ 4, 5, 6 };
+
+    v.insert(v.begin()+1, v2.begin(), v2.end());
+
+    EXPECT_EQ(htk::vector<int>::initial_capacity, v.capacity());
+    expect_eq_rg({ 1,4,5,6,2,3 }, v);
 }
 
+TEST(htk_stl_vector_tests, vector_pod_insert_range_end_no_capacity)
+{
+    htk::vector<int> v{ 1, 2, 3, 40, 50, 60, 70, 80, 90, 100 };
+    htk::vector<int> v2{ 4, 5, 6 };
+
+    v.insert(v.end(), v2.begin(), v2.end());
+
+    EXPECT_LT(htk::vector<int>::initial_capacity, v.capacity());
+    expect_eq_rg({ 1,2,3, 40, 50,60, 70, 80, 90, 100, 4,5,6 }, v);
+}
+
+TEST(htk_stl_vector_tests, vector_pod_insert_range_begin_no_capacity)
+{
+    htk::vector<int> v{ 1, 2, 3, 40, 50, 60, 70, 80, 90, 100 };
+    htk::vector<int> v2{ 4, 5, 6 };
+
+    v.insert(v.begin(), v2.begin(), v2.end());
+
+    EXPECT_LT(htk::vector<int>::initial_capacity, v.capacity());
+    expect_eq_rg({ 4,5,6, 1,2,3, 40, 50,60, 70, 80, 90, 100 }, v);
+}
+
+TEST(htk_stl_vector_tests, vector_pod_insert_range_middle_no_capacity)
+{
+    htk::vector<int> v{ 1, 2, 3, 40, 50, 60, 70, 80, 90, 100 };
+    htk::vector<int> v2{ 4, 5, 6 };
+
+    v.insert(v.begin()+5, v2.begin(), v2.end());
+
+    EXPECT_LT(htk::vector<int>::initial_capacity, v.capacity());
+    expect_eq_rg({ 1,2,3, 40, 50, 4,5,6, 60, 70, 80, 90, 100 }, v);
+}
 
 // clear
 TEST(htk_stl_vector_tests, vector_clear_pod)
@@ -441,7 +476,7 @@ TEST(htk_stl_vector_tests, vector_clear_after_expand_npod)
 }
 
 
-// algorithms
+// std algorithms
 TEST(htk_stl_vector_tests, vector_for)
 {
     htk::vector<int> v;
@@ -477,5 +512,29 @@ TEST(htk_stl_vector_tests, vector_sort)
     v.emplace_back(7);
     v.emplace_back(0);
     std::sort(v.begin(), v.end());
+    expect_eq_rg({ 0,3,7 }, v);
 }
 
+TEST(htk_stl_vector_tests, vector_stable_partition)
+{
+    htk::vector<int> v{ 0, 0, 3, 0, 2, 4, 5, 0, 7 };
+    std::stable_partition(v.begin(), v.end(), [](int n) {return n > 0; });
+    expect_eq_rg({ 3,2,4,5,7,0,0,0,0 }, v);
+}
+
+TEST(htk_stl_vector_tests, vector_includes_true)
+{
+    htk::vector<int> v{ 2,3,4,5,7 };
+    htk::vector<int> v1{ 2, 3, 4,};
+    EXPECT_TRUE(std::includes(v.begin(), v.end(), v1.begin(), v1.end()), "includes wrong");
+}
+
+TEST(htk_stl_vector_tests, vector_includes_false)
+{
+    htk::vector<int> v{ 2,3,4,5,7};
+    htk::vector<int> v1{ 4, 5, 6, };
+
+    EXPECT_FALSE(std::includes(v.begin(), v.end(), v1.begin(), v1.end()), "includes wrong");
+}
+
+// htk algorithms

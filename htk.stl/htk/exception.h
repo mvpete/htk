@@ -22,11 +22,12 @@ namespace htk
         }
 
         exception(const char* message)
-            :message_(reinterpret_cast<const char *>(::operator new(strnlen(message,256))))
+            :message_(reinterpret_cast<const char *>(::operator new(strnlen(message,255)+1)))
         {
             if (message_ == nullptr)
                 exit(-1);
-            strncpy_s(const_cast<char *const>(message_), 256, message, 256);
+            const auto len = strnlen(message, 255)+1;
+            strncpy_s(const_cast<char *const>(message_), len, message, 255);
         }
 
         exception(const exception& e)
@@ -56,22 +57,6 @@ namespace htk
         bad_alloc(const char *message)
             :exception(message)
         {
-        }
-    };
-
-    class invalid_operation : public exception
-    {
-    public:
-        invalid_operation()
-            :exception("invalid operation")
-        {
-
-        }
-
-        invalid_operation(const char* message)
-            :exception(message)
-        {
-
         }
     };
 

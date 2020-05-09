@@ -10,6 +10,8 @@
 
 #include <vector>
 
+
+
 namespace htk
 {
     void assert_(bool cond, const char* msg)
@@ -28,12 +30,12 @@ namespace htk
     class vector_iterator
     {
     public:
-        using container = const VectorT;
         using iterator_category = random_access_iterator_tag;
-        using value_type = typename container::value_type;
-        using pointer = typename container::const_pointer;
-        using reference = typename container::reference;
+        using container = const VectorT;
         using difference_type = typename container::difference_type;
+        using value_type = typename container::value_type;
+        using pointer = typename container::pointer;
+        using reference = typename container::reference;
 
         vector_iterator()
             :ptr_(nullptr), vec_(nullptr)
@@ -59,7 +61,7 @@ namespace htk
 
         reference operator*()
         {
-            return const_cast<reference>(vector_iterator::operator*());
+            return const_cast<reference>(const_cast<const vector_iterator*>(this)->operator*());
         }
 
         pointer operator->() const
@@ -79,7 +81,7 @@ namespace htk
 
         vector_iterator operator++(int)
         {
-            vector_const_iterator tmp{ *this };
+            vector_iterator tmp{ *this };
             ++(*this);
             return tmp;
         }
@@ -103,7 +105,7 @@ namespace htk
         {
             assert_(ptr_ != nullptr, "empty iterator");
             assert_(ptr_ > vec_->data_.first, "cannot decrement past start");
-            ++ptr_;
+            --ptr_;
             return *this;
         }
 
@@ -153,6 +155,13 @@ namespace htk
         pointer ptr_;
         container *vec_;
     };
+
+
+    template <typename VectorT>
+    typename vector_iterator<VectorT>::difference_type operator-(const vector_iterator<VectorT>& r, const vector_iterator<VectorT>& l)
+    {
+        return r.ptr() - l.ptr();
+    }
 
     /*
         We're going to implement a simple vector, that uses a simple allocator,
@@ -223,6 +232,16 @@ namespace htk
             :data_{ nullptr,nullptr,nullptr }
         {
         }
+
+        vector(const htk::initializer_list<T>& init)
+            :data_{nullptr,nullptr,nullptr}
+        {
+            ensure_space_at_least(init.size());
+            insert(end(), init.begin(), init.end());
+        }
+
+        vector(const vector& v) = delete;
+        vector(vector &v) = delete;
         
         ~vector() noexcept
         {
@@ -346,15 +365,16 @@ namespace htk
             return vector_iterator(data_.first + offset, this);
         }
 
-        template <typename It, typename = htk::enable_if_t<std::is_pointer_v<htk::remove_cvref_t<It>>>>
+        template <typename It, typename = htk::enable_if_t<htk::is_iterator_v<It>>>
         iterator insert(const_iterator where, It start, It fin)
         {
+
             // if we're not at the end; and the count is larger than what's there
             // we need to grow
             const auto count = fin - start;
-            const auto offset = where - data_.first;
+            const auto offset = where.ptr() - data_.first;
             const pointer whereptr = data_.first + offset;
-            if (where != end() && freespace() < count)
+            if (freespace() < count)
             {
                 // we're going to reallocate
                 const auto cap = calculate_growth(count);
@@ -370,9 +390,9 @@ namespace htk
                 try
                 {
                     move_items(data_.first, data_.first + offset, next.first, copy_type{});
-                    auto dest = first;
+                    auto dest = first + offset;
                    while(start!=fin)
-                        allocator_.construct(*(dest), *(start));
+                        allocator_.construct(*(dest++), *(start++));
                     move_items(data_.first + offset, data_.last, dest, copy_type{});
 
                 }
@@ -403,7 +423,7 @@ namespace htk
                 }
                 else
                 {
-                    const auto el2move = static_cast<size_type>(data_.last - where);
+                    const auto el2move = static_cast<size_type>(data_.last - whereptr);
                     if (count > el2move) // I'm inserting more than elements to move, move it all
                     {
                         move_items(whereptr, data_.last, data_.last, copy_type{});
@@ -429,7 +449,7 @@ namespace htk
                 assign_values(data_.last, start, fin);
                 data_.last += count;
             }
-            return data_.first + offset;
+            return vector_iterator(data_.first + offset, this);
         }
 
         void clear()
@@ -663,11 +683,6 @@ namespace htk
     };
 
 
-    template <typename VectorT>
-    typename VectorT::difference_type operator-(const vector_iterator<VectorT>& r, const vector_iterator<VectorT>& l)
-    {
-        return r.ptr() - l.ptr();
-    }
 }
 
 #endif // __htk_vector_h__

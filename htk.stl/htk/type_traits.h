@@ -27,6 +27,12 @@ namespace htk
     using true_type = bool_constant<true>;
     using false_type = bool_constant<false>;
 
+    template <typename ...Args>
+    using void_t = void;
+
+    template <typename ...Args>
+    using int_t = int;
+
     template <typename T>
     struct remove_reference
     {
@@ -121,6 +127,16 @@ namespace htk
 
     template <typename T>
     constexpr bool is_pointer_v = is_pointer<T>::value;
+
+    template <typename T = void>
+    struct is_void : false_type {};
+
+    template <>
+    struct is_void<void> : true_type {};
+
+    template <typename T>
+    constexpr bool is_void_v = is_void<remove_cv_t<T>>::value;
+
 }
 
 #endif //__htk_type_traits_h__

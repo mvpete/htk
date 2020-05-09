@@ -25,6 +25,21 @@ namespace htk
         }
     };
 
+    class invalid_operation : public logic_error
+    {
+    public:
+        invalid_operation()
+            :logic_error("invalid operation")
+        {
+
+        }
+
+        invalid_operation(const char* message)
+            :logic_error(message)
+        {
+
+        }
+    };
 };
 
 
