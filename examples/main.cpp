@@ -1,121 +1,165 @@
-//
-//#include <htk/co_routine.h>
-//
-//#include <iostream>
-//#include <future>
-//
-//htk::co_task<int> r()
-//{
-//	//co_await htk::co_schedule();
-//	co_return 4;
-//}
-//
-//
-//htk::co_task<int> r3()
-//{
-//	auto val = co_await htk::co_schedule([]() { return 6; });
-//	co_return val;
-//}
-//
-//htk::co_task<void> resume_background()
-//{
-//	std::cout << std::this_thread::get_id() << ": " << "This happens." << std::endl;
-//	co_await std::experimental::suspend_always{}; // suspension point, returns control back to caller
-//	std::cout << std::this_thread::get_id() << ": " << "Then this happens." << std::endl;
-//}
-////
-////htk::co_task<int> something_int_async()
-////{
-////	std::cout << std::this_thread::get_id() << ": " << "This on this thread." << std::endl;
-////	co_await htk::resume_now();
-////	co_return 4;
-////}
-////
-////htk::co_task<void> something_async()
-////{
-////    std::cout << std::this_thread::get_id() << ": " << "This...." << std::endl;
-////    co_await htk::resume_now();
-////    std::cout << std::this_thread::get_id() << ": " << "And then this..." << std::endl;
-////}
-////
-////htk::co_task<void> nested_async()
-////{
-////    std::cout << std::this_thread::get_id() << ": " << "Start your horses" << std::endl;
-////    co_await something_async();
-////	std::cout << std::this_thread::get_id() << ": " << "Then the next one" << std::endl;
-////    co_await something_async();
-////}
-//
-//int main()
-//{
-//	std::cout << "main thread: " << std::this_thread::get_id() << std::endl;
-//	//auto task = htk::co_schedule(nested_async());
-//	htk::co_task<int> task_2 = htk::co_schedule(r());
-//
-//	auto task_3 = htk::co_schedule(r3());
-//    //std::cout << "Initial resume" << std::endl;
-//
-//	/*std::thread t([]()
-//	{
-//		std::cout << "thread 1: " << std::this_thread::get_id() << std::endl;
-//		htk::scheduler::this_scheduler::get().run();
-//	});
-//
-//	std::thread t2([]()
-//	{
-//		std::cout << "thread 2: " << std::this_thread::get_id() << std::endl;
-//		htk::scheduler::this_scheduler::get().run();
-//	});*/
-//
-//	try
-//	{
-//		std::cout << "task_2::get() : " << task_2.get() << std::endl;
-//		std::cout << "task_3::get() : " << task_3.get() << std::endl;
-//		htk::scheduler::this_scheduler::get().stop();
-//		/*t.join();
-//		t2.join();*/
-//	}
-//	catch (const std::exception & e)
-//	{
-//		std::cout << std::this_thread::get_id() << ": " << "an exception occurred: " << e.what() << std::endl;
-//	}
-//    return 0;
-//}
 
-// Type your code here, or load an example.
-#include <string>
+#include <chrono>
+#include <htk/chronograph.h>
 #include <iostream>
-#include <type_traits>
+#include <random>
+#include <thread>
 
-template <int value>
-constexpr bool is_three()
+#include <htk/vector.h>
+#include <vector>
+
+using namespace chronograph;
+
+template <typename T, typename VectorT>
+VectorT random_numeric_vector(size_t size)
 {
-    return value == 3;
+    VectorT v;
+
+    std::default_random_engine generator;
+    std::uniform_int_distribution<T> distribution(std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
+
+    for (size_t i = 0; i < size; ++i)
+    {
+        v.emplace_back(distribution(generator));
+    }
+    return v;
 }
 
-template <int value>
-constexpr bool is_three_v = is_three<value>();
-
-
-template <int value>
-std::enable_if_t<!is_three_v<value>> foo()
+size_t next_random(size_t max)
 {
-    std::cout << value << std::endl;
-}
-
-template <int value>
-std::enable_if_t<is_three_v<value>> foo()
-{
-    std::cout << "three" << std::endl;
+    std::default_random_engine generator;
+    std::uniform_int_distribution<size_t> distribution(0, max);
+    return distribution(generator);
 }
 
 
 int main()
 {
+    session s;
+    {
+        std::vector<int> v;
+        benchmark(s, "vector<int> emplace 10", [&v]() {
+            for (int i = 0; i < 10; ++i)
+                v.emplace_back(10);
+        });
+    }
+    {
+        htk::vector<int> hv;
+        benchmark(s, "htk::vector<int> emplace 10", [&hv]() {
+            for (int i = 0; i < 10; ++i)
+                hv.emplace_back(10);
+        });
+    }
 
-    _Is_iterator_v
-    foo<1>();
-    foo<2>();
-    foo<3>();
-    foo<4>();
+    {
+        std::vector<int> v;
+        benchmark(s, "vector<int> emplace 100", [&v]() {
+            for (int i = 0; i < 100; ++i)
+                v.emplace_back(10);
+        });
+    }
+    {
+        htk::vector<int> hv;
+        benchmark(s, "htk::vector<int> emplace 100", [&hv]() {
+            for (int i = 0; i < 100; ++i)
+                hv.emplace_back(i);
+        });
+    }
+
+    {
+        std::vector<int> v;
+        benchmark(s, "vector<int> emplace 1000", [&v]() {
+            for (int i = 0; i < 1000; ++i)
+                v.emplace_back(10);
+        });
+    }
+    {
+        htk::vector<int> hv;
+        benchmark(s, "htk::vector<int> emplace 10000", [&hv]() {
+            for (int i = 0; i < 1000; ++i)
+                hv.emplace_back(10);
+        });
+    }
+
+    {
+        std::vector<int> v;
+        benchmark(s, "vector<int> emplace 10000", [&v]() {
+            for (int i = 0; i < 10000; ++i)
+                v.emplace_back(10);
+        });
+    }
+    {
+        htk::vector<int> hv;
+        benchmark(s, "htk::vector<int> emplace 10000", [&hv]() {
+            for (int i = 0; i < 10000; ++i)
+                hv.emplace_back(10);
+        });
+    }
+
+    {
+        benchmark(s, "vector<int> insert-end", [](session_run &r) {
+            std::vector<int> v = random_numeric_vector<int, std::vector<int>>(1000);
+            std::vector<int> v2 = random_numeric_vector<int, std::vector<int>>(1000);
+            measure(r, [&v, &v2]() {
+                v.insert(v.end(), v2.begin(), v2.end());
+            });
+        });
+    }
+
+    {
+        benchmark(s, "htk::vector<int> insert-end", [](session_run &r) {
+            auto v = random_numeric_vector<int, htk::vector<int>>(1000);
+            auto v2 = random_numeric_vector<int, htk::vector<int>>(1000);
+            measure(r, [&v, &v2]() {
+                v.insert(v.end(), v2.begin(), v2.end());
+            });
+        });
+    }
+
+    {
+        benchmark(s, "vector<int> insert-begin", [](session_run &r) {
+            std::vector<int> v = random_numeric_vector<int, std::vector<int>>(1000);
+            std::vector<int> v2 = random_numeric_vector<int, std::vector<int>>(1000);
+            measure(r, [&v, &v2]() {
+                v.insert(v.begin(), v2.begin(), v2.end());
+            });
+        });
+    }
+
+    {
+        benchmark(s, "htk::vector<int> insert-begin", [](session_run &r) {
+            auto v = random_numeric_vector<int, htk::vector<int>>(1000);
+            auto v2 = random_numeric_vector<int, htk::vector<int>>(1000);
+            measure(r, [&v, &v2]() {
+                v.insert(v.begin(), v2.begin(), v2.end());
+            });
+        });
+    }
+
+    {
+        benchmark(s, "vector<int> insert-mid", [](session_run &r) {
+            std::vector<int> v = random_numeric_vector<int, std::vector<int>>(1000);
+            std::vector<int> v2 = random_numeric_vector<int, std::vector<int>>(1000);
+            auto i = next_random(v.size()-1);
+            auto insert = v.begin() + i;
+            measure(r, [&v, &v2, insert]() {
+                v.insert(insert, v2.begin(), v2.end());
+            });
+        });
+    }
+
+    {
+        benchmark(s, "htk::vector<int> insert-mid", [](session_run &r) {
+            auto v = random_numeric_vector<int, htk::vector<int>>(1000);
+            auto v2 = random_numeric_vector<int, htk::vector<int>>(1000);
+            auto i = next_random(v.size() - 1);
+            auto insert = v.begin() + i;
+            measure(r, [&v, &v2, insert]() {
+                v.insert(insert, v2.begin(), v2.end());
+            });
+        });
+    }
+
+
+    format_table(std::cout, s);
 }

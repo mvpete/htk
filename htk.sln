@@ -11,6 +11,13 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "htk.stl", "htk.stl\htk.stl.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "htk.stl.test", "htk.stl.test\htk.stl.test.vcxproj", "{BE91ACBB-6573-40F6-BA5E-3850714B1295}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "htk.chronograph", "htk.chronograph\htk.chronograph.vcxproj", "{08A2C3B1-9473-4F3A-95A4-20FA017DDB8F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A2937360-5694-41D7-A591-7AD8DE9111E3}"
+	ProjectSection(SolutionItems) = preProject
+		.clang-format = .clang-format
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -51,6 +58,14 @@ Global
 		{BE91ACBB-6573-40F6-BA5E-3850714B1295}.Release|x64.Build.0 = Release|x64
 		{BE91ACBB-6573-40F6-BA5E-3850714B1295}.Release|x86.ActiveCfg = Release|Win32
 		{BE91ACBB-6573-40F6-BA5E-3850714B1295}.Release|x86.Build.0 = Release|Win32
+		{08A2C3B1-9473-4F3A-95A4-20FA017DDB8F}.Debug|x64.ActiveCfg = Debug|x64
+		{08A2C3B1-9473-4F3A-95A4-20FA017DDB8F}.Debug|x64.Build.0 = Debug|x64
+		{08A2C3B1-9473-4F3A-95A4-20FA017DDB8F}.Debug|x86.ActiveCfg = Debug|Win32
+		{08A2C3B1-9473-4F3A-95A4-20FA017DDB8F}.Debug|x86.Build.0 = Debug|Win32
+		{08A2C3B1-9473-4F3A-95A4-20FA017DDB8F}.Release|x64.ActiveCfg = Release|x64
+		{08A2C3B1-9473-4F3A-95A4-20FA017DDB8F}.Release|x64.Build.0 = Release|x64
+		{08A2C3B1-9473-4F3A-95A4-20FA017DDB8F}.Release|x86.ActiveCfg = Release|Win32
+		{08A2C3B1-9473-4F3A-95A4-20FA017DDB8F}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

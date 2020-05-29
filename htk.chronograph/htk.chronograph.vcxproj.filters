@@ -15,31 +15,22 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\htk\exception.h">
+    <ClInclude Include="include\htk\chronograph.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\htk\initializer_list.h">
+    <ClInclude Include="include\htk\clock.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\htk\iterator.h">
+    <ClInclude Include="include\htk\format.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\htk\memory.h">
+    <ClInclude Include="include\htk\lap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\htk\stdexcept.h">
+    <ClInclude Include="include\htk\session.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\htk\type_traits.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\htk\types.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\htk\utility.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\htk\vector.h">
+    <ClInclude Include="include\htk\statistics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

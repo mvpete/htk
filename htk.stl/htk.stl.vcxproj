@@ -19,15 +19,15 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="htk\exception.h" />
-    <ClInclude Include="htk\initializer_list.h" />
-    <ClInclude Include="htk\iterator.h" />
-    <ClInclude Include="htk\memory.h" />
-    <ClInclude Include="htk\stdexcept.h" />
-    <ClInclude Include="htk\types.h" />
-    <ClInclude Include="htk\type_traits.h" />
-    <ClInclude Include="htk\utility.h" />
-    <ClInclude Include="htk\vector.h" />
+    <ClInclude Include="include\htk\exception.h" />
+    <ClInclude Include="include\htk\initializer_list.h" />
+    <ClInclude Include="include\htk\iterator.h" />
+    <ClInclude Include="include\htk\memory.h" />
+    <ClInclude Include="include\htk\stdexcept.h" />
+    <ClInclude Include="include\htk\types.h" />
+    <ClInclude Include="include\htk\type_traits.h" />
+    <ClInclude Include="include\htk\utility.h" />
+    <ClInclude Include="include\htk\vector.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -83,19 +83,19 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);./;</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);./include;</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);./;</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);./include;</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);./;</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);./include;</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);./;</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);./include;</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

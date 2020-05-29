@@ -111,7 +111,7 @@ namespace htk
 
         vector_iterator operator--(int)
         {
-            vector_const_iterator tmp{ *this };
+            vector_iterator tmp{ *this };
             --(*this);
             return tmp;
         }
@@ -180,15 +180,15 @@ namespace htk
     public:
         static constexpr size_t initial_capacity = 10;
         using value_type = T;
-        using allocator_type = AllocatorT;
-        using size_type = htk::size_t;
-        using difference_type = htk::ptrdiff_t;
         using reference = typename AllocatorT::reference;
         using const_reference = typename AllocatorT::const_reference;
-        using pointer = typename AllocatorT::pointer;
-        using const_pointer = typename AllocatorT::const_pointer;
         using iterator = vector_iterator<vector<T>>;
         using const_iterator = const vector_iterator<vector<T>>;
+        using difference_type = htk::ptrdiff_t;
+        using size_type = htk::size_t;
+        using allocator_type = AllocatorT;
+        using pointer = typename AllocatorT::pointer;
+        using const_pointer = typename AllocatorT::const_pointer;
 
     private:
         struct move_items_tag {};
@@ -241,7 +241,11 @@ namespace htk
         }
 
         vector(const vector& v) = delete;
-        vector(vector &v) = delete;
+        vector(vector &&v)
+            : data_{ nullptr, nullptr, nullptr }
+        {
+            std::swap(data_, v.data_);
+        }
         
         ~vector() noexcept
         {
@@ -505,12 +509,12 @@ namespace htk
 
     public:
 
-        const_iterator begin() const
+        const_iterator cbegin() const
         {
             return iterator(data_.first, this);
         }
 
-        const_iterator end() const
+        const_iterator cend() const
         {
             return iterator(data_.last, this);
         }

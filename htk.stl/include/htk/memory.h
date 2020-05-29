@@ -25,6 +25,7 @@ namespace htk
     template <typename T>
     struct allocator
     {
+        using value_type = typename htk::remove_cvref_t<T>;
         using pointer = T*;
         using const_pointer = const T*;
         using reference = T&;
@@ -32,6 +33,7 @@ namespace htk
         using size_type = size_t;
 
         allocator() = default;
+        allocator(const allocator&) {}
         ~allocator() = default;
 
         // address
@@ -82,6 +84,18 @@ namespace htk
     {
         using pointer = void*;
     };
+
+    template <typename T, typename U>
+    bool operator==(const allocator<T> &l, const allocator<U> &r)
+    {
+        return true;
+    }
+
+    template <typename T, typename U>
+    bool operator!=(const allocator<T>& l, const allocator<U>& r)
+    {
+        return !operator==(l,r);
+    }
 }
 
 
