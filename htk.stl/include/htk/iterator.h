@@ -1,8 +1,8 @@
 #ifndef __iterator_h__
 #define __iterator_h__
 
-#include <htk/types.h>
 #include <htk/type_traits.h>
+#include <htk/types.h>
 
 namespace htk
 {
@@ -22,20 +22,20 @@ namespace htk
 #endif
 
     template <typename, typename = void>
-    struct iterator_traits 
+    struct iterator_traits
     {
     };
 
-    // uses SFINAE to overload if iterator has the traits. 
-    // 
+    // uses SFINAE to overload if iterator has the traits.
+    //
     template <typename Iterator>
-    struct iterator_traits<Iterator, 
+    struct iterator_traits<Iterator,
         void_t<
-        typename Iterator::iterator_category, 
-        typename Iterator::difference_type, 
-        typename Iterator::value_type, 
-        typename Iterator::pointer,
-        typename Iterator::reference >>
+            typename Iterator::iterator_category,
+            typename Iterator::difference_type,
+            typename Iterator::value_type,
+            typename Iterator::pointer,
+            typename Iterator::reference>>
     {
         using iterator_category = typename Iterator::iterator_category;
         using difference_type = typename Iterator::difference_type;
@@ -45,30 +45,34 @@ namespace htk
     };
 
     template <typename T>
-    struct iterator_traits<T*>
+    struct iterator_traits<T *>
     {
         using iterator_category = random_access_iterator_tag;
         using difference_type = htk::ptrdiff_t;
         using value_type = T;
-        using pointer = T*;
-        using reference = T&;
+        using pointer = T *;
+        using reference = T &;
     };
 
     template <typename T>
-    struct iterator_traits<const T*>
+    struct iterator_traits<const T *>
     {
         using iterator_category = random_access_iterator_tag;
         using difference_type = htk::ptrdiff_t;
         using value_type = T;
-        using pointer = const T*;
-        using reference = const T&;
+        using pointer = const T *;
+        using reference = const T &;
     };
-    
-    template<typename T, typename = void>
-    struct has_iterator_cat : false_type {};
 
-    template<typename T>
-    struct has_iterator_cat<T, void_t<typename iterator_traits<T>::iterator_category>> : true_type {};
+    template <typename T, typename = void>
+    struct has_iterator_cat : false_type
+    {
+    };
+
+    template <typename T>
+    struct has_iterator_cat<T, void_t<typename iterator_traits<T>::iterator_category>> : true_type
+    {
+    };
 
     template <typename T>
     constexpr bool has_iterator_cat_v = has_iterator_cat<T>::value;
@@ -76,6 +80,11 @@ namespace htk
     template <typename Iterator>
     constexpr bool is_iterator_v = has_iterator_cat_v<Iterator>;
 
+    namespace detail
+    {
+        template <typename IteratorT>
+        typename iterator_traits<IteratorT>::pointer undress(IteratorT &&t);
+    }
 };
 
 #endif // __iterator_h_;

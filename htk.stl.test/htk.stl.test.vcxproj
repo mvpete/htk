@@ -33,6 +33,7 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <ItemGroup>
+    <ClCompile Include="test_algorithm.cpp" />
     <ClCompile Include="test_allocator.cpp" />
     <ClCompile Include="test_vector.cpp" />
   </ItemGroup>
@@ -58,7 +59,7 @@
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
-      <AdditionalIncludeDirectories>../htk.stl/;$(MSBuildThisFileDirectory)include;%(AdditionalIncludeDirectories);</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../htk.stl/include/;$(MSBuildThisFileDirectory)include;%(AdditionalIncludeDirectories);</AdditionalIncludeDirectories>
       <AdditionalOptions>/std:c++latest %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
@@ -75,7 +76,7 @@
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
-      <AdditionalIncludeDirectories>../htk.stl/;$(MSBuildThisFileDirectory)include;%(AdditionalIncludeDirectories);</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../htk.stl/include/;$(MSBuildThisFileDirectory)include;%(AdditionalIncludeDirectories);</AdditionalIncludeDirectories>
       <AdditionalOptions>/std:c++latest %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
@@ -91,7 +92,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>../htk.stl/;$(MSBuildThisFileDirectory)include;%(AdditionalIncludeDirectories);../htk.stl/;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../htk.stl/include/;$(MSBuildThisFileDirectory)include;%(AdditionalIncludeDirectories);../htk.stl/;</AdditionalIncludeDirectories>
       <AdditionalOptions>/std:c++latest %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
@@ -109,7 +110,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>../htk.stl/;$(MSBuildThisFileDirectory)include;%(AdditionalIncludeDirectories);../htk.stl/;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../htk.stl/include/;$(MSBuildThisFileDirectory)include;%(AdditionalIncludeDirectories);../htk.stl/;</AdditionalIncludeDirectories>
       <AdditionalOptions>/std:c++latest %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>

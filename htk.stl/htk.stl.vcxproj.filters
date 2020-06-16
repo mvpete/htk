@@ -42,5 +42,8 @@
     <ClInclude Include="include\htk\vector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\htk\algorithm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

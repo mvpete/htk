@@ -1,12 +1,12 @@
 #ifndef __htk_vector_h__
 #define __htk_vector_h__
 
-#include <htk/iterator.h>
+#include <htk/exception.h>
 #include <htk/initializer_list.h>
+#include <htk/iterator.h>
 #include <htk/memory.h>
 #include <htk/stdexcept.h>
 #include <htk/utility.h>
-#include <htk/exception.h>
 
 #include <vector>
 
@@ -14,7 +14,7 @@
 
 namespace htk
 {
-    void assert_(bool cond, const char* msg)
+    void assert_(bool cond, const char *msg)
     {
         if (!cond)
             throw invalid_operation(msg);
@@ -38,18 +38,19 @@ namespace htk
         using reference = typename container::reference;
 
         vector_iterator()
-            :ptr_(nullptr), vec_(nullptr)
+            : ptr_(nullptr), vec_(nullptr)
         {
         }
 
         vector_iterator(pointer ptr, container *vec)
-            :ptr_(ptr), vec_(vec)
+            : ptr_(ptr), vec_(vec)
         {
         }
 
-        vector_iterator(const vector_iterator& rhs)
-            :ptr_(rhs.ptr_), vec_(rhs.vec_)
-        {}
+        vector_iterator(const vector_iterator &rhs)
+            : ptr_(rhs.ptr_), vec_(rhs.vec_)
+        {
+        }
 
         // we need to increment / decrement / dereference
         const reference operator*() const
@@ -61,7 +62,7 @@ namespace htk
 
         reference operator*()
         {
-            return const_cast<reference>(const_cast<const vector_iterator*>(this)->operator*());
+            return const_cast<reference>(const_cast<const vector_iterator *>(this)->operator*());
         }
 
         pointer operator->() const
@@ -71,7 +72,7 @@ namespace htk
             return ptr_;
         }
 
-        vector_iterator& operator++()
+        vector_iterator &operator++()
         {
             assert_(ptr_ != nullptr, "empty iterator");
             assert_(ptr_ < vec_->data_.last, "cannot increment past end");
@@ -101,7 +102,7 @@ namespace htk
             return tmp += val;
         }
 
-        vector_iterator& operator--()
+        vector_iterator &operator--()
         {
             assert_(ptr_ != nullptr, "empty iterator");
             assert_(ptr_ > vec_->data_.first, "cannot decrement past start");
@@ -131,25 +132,25 @@ namespace htk
             return tmp -= val;
         }
 
-        bool operator<(const vector_iterator& rhs) const
+        bool operator<(const vector_iterator &rhs) const
         {
             assert_(vec_ == rhs.vec_, "incompatible iterators");
             return ptr_ < rhs.ptr_;
         }
 
-        bool operator==(const vector_iterator&rhs) const
+        bool operator==(const vector_iterator &rhs) const
         {
             assert_(vec_ == rhs.vec_, "incompatible iterators");
             return ptr_ == rhs.ptr_;
         }
 
-        bool operator!=(const vector_iterator& rhs) const
+        bool operator!=(const vector_iterator &rhs) const
         {
             return !(*this == rhs);
         }
 
-        const pointer& ptr() const { return ptr_; }
-        pointer& ptr() { return ptr_; }
+        const pointer &ptr() const { return ptr_; }
+        pointer &ptr() { return ptr_; }
 
     private:
         pointer ptr_;
@@ -158,7 +159,7 @@ namespace htk
 
 
     template <typename VectorT>
-    typename vector_iterator<VectorT>::difference_type operator-(const vector_iterator<VectorT>& r, const vector_iterator<VectorT>& l)
+    typename vector_iterator<VectorT>::difference_type operator-(const vector_iterator<VectorT> &r, const vector_iterator<VectorT> &l)
     {
         return r.ptr() - l.ptr();
     }
@@ -171,8 +172,8 @@ namespace htk
         with the std::algorithms.
     */
 
-  
-    template <typename T, typename AllocatorT=htk::allocator<T>>
+
+    template <typename T, typename AllocatorT = htk::allocator<T>>
     class vector
     {
         friend vector_iterator;
@@ -191,12 +192,18 @@ namespace htk
         using const_pointer = typename AllocatorT::const_pointer;
 
     private:
-        struct move_items_tag {};
-        struct copy_items_tag {};
-        struct memcpy_items_tag {};
+        struct move_items_tag
+        {
+        };
+        struct copy_items_tag
+        {
+        };
+        struct memcpy_items_tag
+        {
+        };
 
-        using copy_type = typename htk::conditional<htk::is_trivial_v<T>, memcpy_items_tag, 
-                          typename htk::conditional<htk::is_move_constructible_v<T>, move_items_tag, copy_items_tag>::type>::type;
+        using copy_type = typename htk::conditional<htk::is_trivial_v<T>, memcpy_items_tag,
+            typename htk::conditional<htk::is_move_constructible_v<T>, move_items_tag, copy_items_tag>::type>::type;
 
     private:
         struct data
@@ -219,9 +226,8 @@ namespace htk
             {
                 return end_of_container - last;
             }
-
         };
-        
+
         data data_;
         AllocatorT allocator_;
 
@@ -229,24 +235,24 @@ namespace htk
 
     public:
         vector()
-            :data_{ nullptr,nullptr,nullptr }
+            : data_{ nullptr, nullptr, nullptr }
         {
         }
 
-        vector(const htk::initializer_list<T>& init)
-            :data_{nullptr,nullptr,nullptr}
+        vector(const htk::initializer_list<T> &init)
+            : data_{ nullptr, nullptr, nullptr }
         {
             ensure_space_at_least(init.size());
             insert(end(), init.begin(), init.end());
         }
 
-        vector(const vector& v) = delete;
+        vector(const vector &v) = delete;
         vector(vector &&v)
             : data_{ nullptr, nullptr, nullptr }
         {
             std::swap(data_, v.data_);
         }
-        
+
         ~vector() noexcept
         {
             destroy(data_.first, data_.last);
@@ -254,32 +260,31 @@ namespace htk
         }
 
     public: // modifiers
-
-        template <typename ...Args>
-        decltype(auto) emplace_back(Args&&...args)
+        template <typename... Args>
+        decltype(auto) emplace_back(Args &&... args)
         {
             ensure_space_at_least(1);
-            allocator_.construct(*(data_.last++), htk::forward<Args>(args)...);        
+            allocator_.construct(*(data_.last++), htk::forward<Args>(args)...);
             return back();
         }
-        
-        template <typename ...Args>
-        decltype(auto) emplace(const_iterator where, Args&&...args)
+
+        template <typename... Args>
+        decltype(auto) emplace(const_iterator where, Args &&... args)
         {
             const T value{ htk::forward(args)... };
             return insert(where, 1, htk::forward(args));
         }
 
-        void push_back(const T& item)
+        void push_back(const T &item)
         {
             emplace_back(item);
         }
 
-        void push_back(T&& item)
+        void push_back(T &&item)
         {
             emplace_back(htk::move(item));
         }
-        
+
         iterator insert(const_iterator where, size_type count, const T &value)
         {
             // if we're not at the end; and the count is larger than what's there
@@ -289,16 +294,16 @@ namespace htk
             if (where != end() && freespace() < count)
             {
                 // we're going to reallocate
-                const auto cap = calculate_growth(count) ;
-                const auto curs = size() ;
-                auto first = allocator_.allocate(cap) ;
+                const auto cap = calculate_growth(count);
+                const auto curs = size();
+                auto first = allocator_.allocate(cap);
 
                 auto last = first + curs + count;
                 const auto end = first + cap;
 
-                data next = { first,last, end };
+                data next = { first, last, end };
                 // we're going to copy
-                
+
                 try
                 {
                     move_items(data_.first, data_.first + offset, next.first, copy_type{});
@@ -307,8 +312,7 @@ namespace htk
                     {
                         allocator_.construct(*(dest), value);
                     }
-                    move_items(data_.first+offset, data_.last, dest, copy_type{});
-
+                    move_items(data_.first + offset, data_.last, dest, copy_type{});
                 }
                 catch (...)
                 {
@@ -350,8 +354,7 @@ namespace htk
                         // move only tail items, and copy backwards the overlap
                         auto target = data_.last;
                         move_items(data_.last - count, data_.last, target, copy_type{});
-                        copy_backward(whereptr, data_.last-count, data_.last, copy_type{});
-                       
+                        copy_backward(whereptr, data_.last - count, data_.last, copy_type{});
                     }
                 }
                 // move the end pointer
@@ -388,17 +391,16 @@ namespace htk
                 auto last = first + curs + count;
                 const auto end = first + cap;
 
-                data next = { first,last, end };
+                data next = { first, last, end };
                 // we're going to copy
 
                 try
                 {
                     move_items(data_.first, data_.first + offset, next.first, copy_type{});
                     auto dest = first + offset;
-                   while(start!=fin)
+                    while (start != fin)
                         allocator_.construct(*(dest++), *(start++));
                     move_items(data_.first + offset, data_.last, dest, copy_type{});
-
                 }
                 catch (...)
                 {
@@ -440,7 +442,6 @@ namespace htk
                         auto target = data_.last;
                         move_items(data_.last - count, data_.last, target, copy_type{});
                         copy_backward(whereptr, data_.last - count, data_.last, copy_type{});
-
                     }
                 }
                 // move the end pointer
@@ -460,7 +461,7 @@ namespace htk
         {
             // destroy all elements.
             // set last = first
-            for(auto begin = data_.first; begin < data_.last; ++begin)
+            for (auto begin = data_.first; begin < data_.last; ++begin)
             {
                 allocator_.destroy(begin);
             }
@@ -469,13 +470,12 @@ namespace htk
 
         void pop_back()
         {
-            allocator_.destroy(data_.last-1);
+            allocator_.destroy(data_.last - 1);
             data_.last--;
         }
 
     public:
-
-        T& back()
+        T &back()
         {
             if (empty())
                 throw htk::exception("back() called on empty vector");
@@ -483,7 +483,7 @@ namespace htk
             return *(data_.last - 1);
         }
 
-        const T& back() const
+        const T &back() const
         {
             if (empty())
                 throw htk::exception("back() called on empty vector");
@@ -491,7 +491,7 @@ namespace htk
             return *(data_.last - 1);
         }
 
-        T& at(size_type index)
+        T &at(size_type index)
         {
             if (data_.last <= data_.first + index)
                 throw out_of_range("index out of range");
@@ -499,7 +499,7 @@ namespace htk
             return *(data_.first + index);
         }
 
-        const T& at(size_type index) const
+        const T &at(size_type index) const
         {
             if (data_.last <= data_.first + index)
                 throw out_of_range("index out of range");
@@ -508,7 +508,6 @@ namespace htk
         }
 
     public:
-
         const_iterator cbegin() const
         {
             return iterator(data_.first, this);
@@ -530,7 +529,6 @@ namespace htk
         }
 
     public: // capacity
-
         size_t freespace() const
         {
             return data_.freespace();
@@ -552,7 +550,6 @@ namespace htk
         }
 
     private:
-
         bool initialize(size_t size)
         {
             if (data_.end_of_container == nullptr)
@@ -599,13 +596,13 @@ namespace htk
             pointer new_vec = allocator_.allocate(cap);
             pointer dest = new_vec;
             try
-            {                
+            {
                 move_items(data_.first, data_.last, dest, copy_type{});
             }
             catch (...)
             {
 
-                // this is wrong. we really need to be keeping track of what was 
+                // this is wrong. we really need to be keeping track of what was
                 // initialized.
                 destroy(new_vec, dest);
                 allocator_.deallocate(new_vec, cap);
@@ -614,13 +611,13 @@ namespace htk
 
             auto old = data_;
             auto curs = size();
-            data_ = data{ new_vec,new_vec + curs, new_vec + cap };
+            data_ = data{ new_vec, new_vec + curs, new_vec + cap };
 
             // destroy the old stuff
             destroy(old.first, old.last);
             allocator_.deallocate(old.first, old.capacity());
         }
-        
+
         // we have to test if it's move constructable
         void move_items(pointer first, pointer last, pointer &dest, move_items_tag)
         {
@@ -628,12 +625,12 @@ namespace htk
                 allocator_.construct(*(dest++), htk::move(*(first++)));
         }
 
-        void move_items(pointer first, pointer last, pointer& dest, memcpy_items_tag)
+        void move_items(pointer first, pointer last, pointer &dest, memcpy_items_tag)
         {
-            memmove(dest, first, (last - first)*sizeof(T));
+            memmove(dest, first, (last - first) * sizeof(T));
         }
 
-        void move_items(pointer first, pointer last, pointer& dest, copy_items_tag)
+        void move_items(pointer first, pointer last, pointer &dest, copy_items_tag)
         {
             while (first != last)
                 allocator_.construct(*(dest++), *(first++));
@@ -666,17 +663,17 @@ namespace htk
             }
         }
 
-        void assign_value(pointer first, pointer last, const T& value)
+        void assign_value(pointer first, pointer last, const T &value)
         {
             while (first != last)
                 *(first++) = value;
         }
 
-        template <typename ...Args>
-        void create(pointer first, pointer last, Args &&...args)
+        template <typename... Args>
+        void create(pointer first, pointer last, Args &&... args)
         {
-            while(first != last)
-            allocator_.construct(*(first++), htk::forward<Args>(args)...);
+            while (first != last)
+                allocator_.construct(*(first++), htk::forward<Args>(args)...);
         }
 
         void destroy(pointer first, pointer last)

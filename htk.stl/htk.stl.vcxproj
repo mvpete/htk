@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\htk\algorithm.h" />
     <ClInclude Include="include\htk\exception.h" />
     <ClInclude Include="include\htk\initializer_list.h" />
     <ClInclude Include="include\htk\iterator.h" />

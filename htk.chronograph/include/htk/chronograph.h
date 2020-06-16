@@ -20,6 +20,19 @@ namespace chronograph
             ss << name << " / " << value;
             return ss.str();
         }
+
+        static std::initializer_list<size_t> default_runs { 10, 100, 1000, 10000, 100000 };
+    }
+
+    // The DoNotOptimize(...) function can be used to prevent a value or
+    // expression from being optimized away by the compiler. This function is
+    // intended to add little to no overhead.
+    // See: https://youtu.be/nXaxk27zwlk?t=2441
+    // https://stackoverflow.com/questions/33975479/escape-and-clobber-equivalent-in-msvc
+    template <class Tp>
+    inline auto do_not_optimize(Tp const &value)
+    {
+        return reinterpret_cast<const char volatile &>(value);
     }
 
     template <typename Callable>
@@ -40,15 +53,12 @@ namespace chronograph
 
     template <typename Callable>
     typename std::enable_if<!std::is_invocable_v<Callable, session_run &>>::type
-    benchmark(session &s, const std::string &name, Callable &&fn, std::initializer_list<size_t> runs = { 10, 100, 1000 })
+    benchmark(session &s, const std::string &name, Callable &&fn, std::initializer_list<size_t> runs = detail::default_runs)
     {
-        // create the session
-        // follow some warmup
-        // I want to measure each iteration, and the total time.
         int group = s.next_group();
         for (const auto iterations : runs)
         {
-            session_run r(s, detail::format_name(name, iterations), group);
+            session_run r(s, name, group);
             for (size_t i = 0; i < iterations; ++i)
             {
                 measure(r, std::forward<Callable>(fn));
@@ -58,12 +68,12 @@ namespace chronograph
 
     template <typename Callable>
     typename std::enable_if<std::is_invocable_v<Callable, session_run &>>::type
-    benchmark(session &s, const std::string &name, Callable &&fn, std::initializer_list<size_t> runs = { 10, 100, 1000 })
+    benchmark(session &s, const std::string &name, Callable &&fn, std::initializer_list<size_t> runs = detail::default_runs)
     {
         int group = s.next_group();
         for (const auto iterations : runs)
         {
-            session_run r(s, detail::format_name(name, iterations), group);
+            session_run r(s, name, group);
             for (size_t i = 0; i < iterations; ++i)
             {
                 fn(r);
@@ -72,14 +82,45 @@ namespace chronograph
     }
 
     template <typename Callable>
-    typename std::enable_if<std::is_invocable_v<Callable, session &, size_t>>::type
-    benchmark(session &s, const std::string &name, Callable &&fn, std::initializer_list<size_t> runs = { 10, 100, 1000 })
+    typename std::enable_if<std::is_invocable_v<Callable, session_run &, size_t>>::type
+    benchmark(session &s, const std::string &name, std::initializer_list<size_t> sizes, Callable &&fn,  std::initializer_list<size_t> runs = detail::default_runs)
     {
-        int group = s.next_group();
-        for (const auto iterations : runs)
+        s.add_column("size");
+        for (const auto size : sizes)
         {
-            fn(s, iterations, group);
+            int group = s.next_group();
+            for (const auto iterations : runs)
+            {
+                session_run r(s, name, group);
+                r.add_column_data(size);
+                for (size_t i = 0; i < iterations; ++i)
+                {
+                    fn(r,size);
+                }
+            }
         }
+    }
+
+    struct tag_csv_format
+    {
+    };
+
+    
+    struct tag_table_format
+    {
+    };
+
+
+    template <typename Stream>
+    void output(Stream &ss, const session &s, tag_table_format)
+    {
+        format_table(ss, s);
+    }
+
+    template<typename Stream>
+    void output(Stream &ss, const session &s, tag_csv_format)
+    {
+        format_csv(ss, s);
     }
 
 };

@@ -28,6 +28,7 @@ namespace chronograph
         const std::string name;
         lap total;
         std::vector<lap> laps;
+        std::vector<std::string> columns;
     };
 
     class session
@@ -69,12 +70,22 @@ namespace chronograph
         int next_group()
         {
             return group_++;
+        }        
+
+        void add_column(const std::string &name)
+        {
+            columns_.emplace_back(name);
         }
-        
+
+        const std::vector<std::string> &columns() const
+        {
+            return columns_;
+        }
 
     private:
         session_context context_;
         std::vector<run> runs_;
+        std::vector<std::string> columns_;
         int group_;
     };
 
@@ -98,7 +109,13 @@ namespace chronograph
         {
             run_->laps.emplace_back(l);
         }
-
+        template <typename T>
+        void add_column_data(const T &s)
+        {
+            std::stringstream ss;
+            ss << s;
+            run_->columns.emplace_back(ss.str());
+        }
 
     private:
         int index_;
